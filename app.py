@@ -26,17 +26,11 @@ def send_dyanamic_test():
         return jsonify(result)
 
 
-
-
-
-
 @app.route('/') 
 def sql_database():
      from functions.sqlquery import sql_query
      results = sql_query(''' SELECT * FROM data_table''')
-     import getMeMyTime
-     sk = getMeMyTime()
-     return jsonify(sk)
+     return jsonify(results)
  
 
 @app.route('/sendTest', methods=["POST"])
@@ -54,9 +48,8 @@ def send_test():
         message_body = "Boat bassheadz earphones (Frosty White)"
         
         def job():
-        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
-
-        schedule.every().day.at("01:49").do(job)
+                result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+                schedule.every().day.at("01:49").do(job)
 
         while 1:
                 schedule.run_pending()
@@ -130,133 +123,6 @@ def getUserTime():
         results2 = sql_query2(''' SELECT * from user_time WHERE user_id = ? ''', (user_id,))
         return jsonify(results2)
         
-
-@app.route('/mapUserTimeAndAction', methods=["POST"])
-#ye bhi baaki hai
-#this is for notification category 1 mapping user intent
-def mapUserTime():
-        #return jsonify("Success")
-        user_id = request.form['user_id']
-        product_id = request.form['product_id']
-        jo_mera_hai = int(product_id)
-        time_of_sending = request.form['time_of_sending']
-        time_of_action = request.form['time_of_action']
-        action = int(request.form['action'])
-        #0 for dismiss ,1 for save later, 2 for opt_in 
-        from functions.sqlquery import sql_query2, sql_query
-        results = sql_query2(''' INSERT INTO notifications (user_id, product_id, time_of_sending, time_of_action,action) VALUES (?,?,?,?,?)''', (user_id, product_id, time_of_sending, time_of_action, action))
-        results2 = sql_query2(''' SELECT * from notifications WHERE user_id = ? ''', (user_id,))
-        
-        #if action is dismissed- get a better product.
-        if action == 0:
-                
-                #ab ye kya karega, like time ye log jo decide karenge tab tak rukega 
-                #but will punish the original product ki wo kaise aaya aise
-                #from functions.sqlquery import sql_query2, sql_query
-                results = sql_query2(''' SELECT search1_id, time_spent from searches where user_id = ?''',  (user_id,)) 
-                results = results[-10:] 
-                
-                df = pd.read_csv('products.csv', usecols=['product_id', 'number_of_purchases','name', 'actual_price',
-                                'original_price', 'discount_percentage', 'number_of_offers', 'seller_name'])[1:162]
-                df["number_of_purchases"].fillna("0", inplace=True) 
-                df2 = pd.read_csv('products.csv', usecols=['product_id', 'number_of_purchases'])[1:162]
-                df2["number_of_purchases"].fillna("1", inplace=True) 
-                
-                main_data = df.values.tolist() 
-                data2 = df2.values.tolist()
-                
-                for i in range(len(data2)):
-                        data2[i][0] = int(data2[i][0])
-                        data2[i][1] = int(data2[i][1])
-                
-                df3 = pd.read_csv('recommendations.csv')
-                data3 = df3.values.tolist()
-                for i in range(len(data3)):
-                        data3[i][0] = int(data3[i][0])
-                        data3[i][1] = int(data3[i][1])                   
-                total = 0 
-                for i in range(len(data2)):
-                        total+=data2[i][1]               
-                max_value = 0
-                final_id = 1 
-                
-                scale_factor = []
-                x = 512
-                for t in range(10):
-                        scale_factor.append(x)
-                        x = int(x/2) 
-                
-                
-                #for the product dismissed, the scale factor for it should be set properly
-                #phir hi wo aage nahi aayega
-           
-                result_list = []
-                scale_index = 0
-                
-                for i in range(len(data2)):
-                        pro_id = data2[i][0]   
-                        final_prob = 0
-                        every_result = []
-                        for j in range(len(results)):
-                                #return jsonify(len(scale_factor))
-                                second_id = results[j][0]
-                                time_value = results[j][1]
-                                #ab inka intersection nikaalna padta
-                                intersect_value = sql_query2(''' SELECT factor from 
-                                data_table where product_1_id = ? 
-                                and product_2_id = ?''',  (pro_id,second_id)) 
-                                
-                                if not intersect_value:
-                                        value = 0.1
-                                else:
-                                        value = intersect_value[0][0]
-                                        
-                                #time aayega abhi bas
-                                      
-                                quantity_value = sql_query2(''' SELECT number_of_purchases from 
-                                product_table where product_id = ? ''', (second_id,))
-                                quantity = quantity_value[0][0]
-                               
-                                # bayes_prob = probability of A intersection B * probability of purchase b
-                                ratio = quantity/total
-                                computed_value = math.log10(quantity)
-                                time_log = math.log10(time_value)
-                                #log of denominator jaruri nahi hai because nonetheless it manages
-                                #itself by minusing itself from
-                                if pro_id == jo_mera_hai:
-                                        #return jsonify("idhar hai kuch to")
-                                        #merepe hi scale factor lagega
-                                        bayes_prob = (computed_value)*(value)*(time_log)
-                                        bayes_prob = bayes_prob/scale_factor[scale_index]
-                                        scale_index = scale_index + 1
-                                else:
-                                        bayes_prob = (computed_value)*(value)*(time_log)
-                                
-                               
-                                final_prob+=bayes_prob
-                                
-                         
-                                
-                                
-                        shevat = sql_query2(''' SELECT name from 
-                                product_table where product_id = ? ''', (pro_id,))
-                        every_list = [shevat[0][0], final_prob]
-                        
-                        result_list.append(every_list)
-                        
-                        
-        #                if final_prob > max_value:
-        #                        max_value = final_prob
-        #                        final_id = pro_id
-                     
-                #ab we have that product with us. Lets see kya aaya 
-                from operator import itemgetter
-                result_list = sorted(result_list, key=itemgetter(1))
-                
-                return jsonify(result_list[-1])
-        
-        else:   
-                return jsonify("Damn")
 
 @app.route('/deleteHistory', methods=["DELETE"])
 def deleteData():
