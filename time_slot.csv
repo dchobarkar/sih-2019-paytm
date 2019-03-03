@@ -1,0 +1,5 @@
+time_id,time_duration,range_min,range_max
+1,00:00 to 6:00,0,36
+2,6:00 to 12:00,36,72
+3,12:00 to 18:00,72,108
+4,18:00 to 00:00,108,144

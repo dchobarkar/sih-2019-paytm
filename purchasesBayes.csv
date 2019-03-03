@@ -1,0 +1,14 @@
+,,,,,,,,,,,
+User,1,,Historical purchase - time data ,,,,,,,,
+,,,,,,,,,,,
+day,A,B,C,D,E,F,,A,7 to 10,1,Monday
+1,1,0,4,0,4,7,,B,10 to 1,2,Tuesday
+2,2,2,2,1,3,0,,C,1 to 4,3,Wednesday
+3,0,1,1,2,4,2,,D,4 to 7,4,Thursday
+4,0,2,0,1,5,3,,E,7 to 10,5,Friday
+5,1,0,0,2,8,10,,F,10 to 1,6,Saturday
+6,3,4,2,4,7,6,,,,7,Sunday
+7,4,5,1,6,9,1,,,,,
+total,11,14,10,16,40,29,,,,,
+,,,,,,,,,,,
+,,Total number of purchases,120,,,,,,,,
