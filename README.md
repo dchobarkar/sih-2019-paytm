@@ -17,7 +17,7 @@
     $ python app.py
     
 ### Contributors  
-* [Darshan Chobarkar](www.linkedin.com/in/dchobarkar)
+* [Darshan Chobarkar](https://www.linkedin.com/in/dchobarkar/)
 * [Saurabh Lodha](https://github.com/saurabh-lodha-16)
 * [Neeraj Lohade]()
 * [Apurva Deshpande](https://github.com/Apurvasd5)
